@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab dashboard | Behavioural Research Lab</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/admin.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="wordmark" href="/admin">
+      <span class="lab">Lab dashboard</span>
+      <span class="org">Behavioural Research Lab, CHRIST BYC</span>
+    </a>
+    <nav aria-label="Sections">
+      <a href="/">Participant site</a>
+      <a href="#" id="signout">Sign out</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div id="global-message" class="message" hidden></div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" data-tab="overview" aria-selected="true">Overview</button>
+    <button class="tab" role="tab" data-tab="studies" aria-selected="false">Studies and sessions</button>
+    <button class="tab" role="tab" data-tab="participants" aria-selected="false">Participant register</button>
+    <button class="tab" role="tab" data-tab="rules" aria-selected="false">Pool rules</button>
+    <button class="tab" role="tab" data-tab="activity" aria-selected="false">Activity log</button>
+  </div>
+
+  <!-- ============ Overview ============ -->
+  <section id="panel-overview" role="tabpanel">
+    <div class="panel-head">
+      <div>
+        <p class="eyebrow">At a glance</p>
+        <h2>Pool and recruitment</h2>
+        <p>Everything on this page is live. Session times are shown in India Standard Time.</p>
+      </div>
+      <button class="button secondary" type="button" id="refresh-overview">Refresh</button>
+    </div>
+    <div class="grid-3" id="overview-facts"></div>
+    <div class="card" style="margin-top:20px">
+      <h3>Next sessions</h3>
+      <div id="upcoming-sessions"></div>
+    </div>
+  </section>
+
+  <!-- ============ Studies ============ -->
+  <section id="panel-studies" role="tabpanel" hidden>
+    <div class="panel-head">
+      <div>
+        <p class="eyebrow">Recruitment</p>
+        <h2>Studies and sessions</h2>
+        <p>A study cannot be opened for sign-up until it has an ethics approval reference.</p>
+      </div>
+      <button class="button primary" type="button" id="new-study">New study</button>
+    </div>
+    <div id="studies-list" class="loading">Loading.</div>
+  </section>
+
+  <!-- ============ Participants ============ -->
+  <section id="panel-participants" role="tabpanel" hidden>
+    <div class="panel-head">
+      <div>
+        <p class="eyebrow">Register</p>
+        <h2>Participant register</h2>
+        <p>This is personal data. Export it only to a lab-controlled machine.</p>
+      </div>
+      <div class="button-row">
+        <input type="search" id="participant-search" placeholder="Search name, code, email, institution" style="min-width:260px;margin-top:0">
+        <a class="button secondary" href="/api/admin/participants.csv">Download CSV</a>
+      </div>
+    </div>
+    <div id="participants-table" class="loading">Loading.</div>
+  </section>
+
+  <!-- ============ Rules ============ -->
+  <section id="panel-rules" role="tabpanel" hidden>
+    <div class="panel-head">
+      <div>
+        <p class="eyebrow">Policy</p>
+        <h2>Pool rules</h2>
+        <p>These settings are applied to every sign-up. They are the working defaults from the Lab Operations Manual until the Participant pool and operations pack fixes them.</p>
+      </div>
+    </div>
+    <div class="card" style="max-width:640px">
+      <form id="rules-form">
+        <div class="form-grid">
+          <label class="field">Minimum days between two different studies
+            <input type="number" name="minDaysBetweenStudies" min="0" max="365" required>
+          </label>
+          <label class="field">Unexplained no-shows before suspension
+            <input type="number" name="noShowsBeforeSuspension" min="1" max="10" required>
+          </label>
+          <label class="field">Length of a suspension, in days
+            <input type="number" name="suspensionDays" min="1" max="730" required>
+          </label>
+          <label class="field">Default over-recruitment buffer, per cent
+            <input type="number" name="defaultBufferPercent" min="0" max="100" required>
+          </label>
+          <label class="field wide">Consent text version recorded against new registrations
+            <input type="text" name="consentVersion" required>
+          </label>
+          <div class="wide">
+            <label class="check">
+              <input type="checkbox" name="poolOpen">
+              <span>The pool is open for new registrations. Unticking this closes the registration form while leaving existing participants able to sign in and book.</span>
+            </label>
+          </div>
+        </div>
+        <div class="button-row" style="margin-top:18px">
+          <button class="button primary" type="submit">Save rules</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ Activity ============ -->
+  <section id="panel-activity" role="tabpanel" hidden>
+    <div class="panel-head">
+      <div>
+        <p class="eyebrow">Accountability</p>
+        <h2>Activity log</h2>
+        <p>What the dashboard did, and when. It records actions, never the content of a participant record.</p>
+      </div>
+      <button class="button secondary" type="button" id="refresh-activity">Refresh</button>
+    </div>
+    <div id="activity-table" class="loading">Loading.</div>
+  </section>
+</main>
+
+<!-- ============ Study editor ============ -->
+<div class="modal-backdrop" id="study-modal" hidden>
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="study-modal-title">New study</h2>
+      <button class="button small secondary" type="button" data-close="study-modal">Close</button>
+    </div>
+    <div id="study-modal-message" class="message error" hidden></div>
+    <form id="study-form">
+      <input type="hidden" name="id">
+      <fieldset>
+        <legend>The study</legend>
+        <div class="form-grid">
+          <label class="field">Study code
+            <input type="text" name="code" placeholder="BRL-S01">
+          </label>
+          <label class="field">Principal investigator
+            <input type="text" name="piName" placeholder="Dr ...">
+          </label>
+          <label class="field wide">Title shown to participants
+            <input type="text" name="title" required placeholder="Decisions about risk and time">
+          </label>
+          <label class="field wide">One or two sentences for participants
+            <textarea name="summary" placeholder="What a participant will actually do in the session."></textarea>
+          </label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Running it</legend>
+        <div class="form-grid">
+          <label class="field">RCEC approval reference
+            <input type="text" name="rcecReference" placeholder="Required before opening">
+          </label>
+          <label class="field">Payment shown to participants
+            <input type="text" name="incentive" placeholder="Rs 150 show-up, plus earnings">
+          </label>
+          <label class="field">Session length, minutes
+            <input type="number" name="durationMinutes" min="5" max="600" value="60">
+          </label>
+          <label class="field">Default venue
+            <input type="text" name="venue" placeholder="Behavioural Research Lab">
+          </label>
+          <label class="field">Over-recruitment buffer, per cent
+            <input type="number" name="bufferPercent" min="0" max="100">
+          </label>
+          <label class="field">Status
+            <select name="status">
+              <option value="draft">Draft, not visible to participants</option>
+              <option value="open">Open for sign-up</option>
+              <option value="closed">Closed</option>
+            </select>
+          </label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Who it recruits</legend>
+        <div class="form-grid">
+          <label class="field">Minimum age
+            <input type="number" name="minAge" min="18" max="99" value="18">
+          </label>
+          <label class="field">Maximum age
+            <input type="number" name="maxAge" min="18" max="99" value="99">
+          </label>
+          <div class="wide">
+            <label class="check">
+              <input type="checkbox" name="requiresStudent" checked>
+              <span>Only currently enrolled students may take this study.</span>
+            </label>
+          </div>
+          <label class="field wide">Statements a participant must confirm before booking
+            <textarea name="declarations" placeholder="One per line. For example: I have not taken part in a similar decision-making study elsewhere in the past month."></textarea>
+          </label>
+        </div>
+      </fieldset>
+      <div class="button-row">
+        <button class="button primary" type="submit">Save study</button>
+        <button class="button secondary" type="button" data-close="study-modal">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ Roster ============ -->
+<div class="modal-backdrop" id="roster-modal" hidden>
+  <div class="modal" style="max-width:1000px">
+    <div class="modal-head">
+      <div>
+        <p class="eyebrow">Check-in roster</p>
+        <h2 id="roster-title">Session</h2>
+        <p class="field-note" id="roster-meta" style="margin:0"></p>
+      </div>
+      <div class="button-row">
+        <a class="button small secondary" id="roster-csv" href="#">Download CSV</a>
+        <button class="button small secondary" type="button" onclick="window.print()">Print</button>
+        <button class="button small secondary" type="button" data-close="roster-modal">Close</button>
+      </div>
+    </div>
+    <div id="roster-message" class="message" hidden></div>
+    <div id="roster-body"></div>
+  </div>
+</div>
+
+<!-- ============ Participant record ============ -->
+<div class="modal-backdrop" id="participant-modal" hidden>
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="participant-title">Participant</h2>
+      <button class="button small secondary" type="button" data-close="participant-modal">Close</button>
+    </div>
+    <div id="participant-message" class="message" hidden></div>
+    <div id="participant-body"></div>
+  </div>
+</div>
+
+</body>
+</html>

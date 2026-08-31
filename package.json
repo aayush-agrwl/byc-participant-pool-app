@@ -1,0 +1,19 @@
+{
+  "name": "byc-participant-pool",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Participant pool and sign-up system for the Behavioural Research Lab, Department of Economics, CHRIST (Deemed to be University), Bangalore Yeshwanthpur Campus",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "db:init": "node scripts/db-init.mjs",
+    "db:status": "node scripts/db-status.mjs",
+    "db:seed": "node scripts/db-seed.mjs",
+    "db:teardown": "node scripts/db-teardown.mjs",
+    "check": "node scripts/check.mjs",
+    "dev": "node scripts/dev-server.mjs"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.0"
+  }
+}

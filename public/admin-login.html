@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab staff sign-in | Behavioural Research Lab</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/admin-login.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="wordmark" href="/">
+      <span class="lab">Behavioural Research Lab</span>
+      <span class="org">CHRIST (Deemed to be University), Bangalore Yeshwanthpur</span>
+    </a>
+    <nav aria-label="Sections"><a href="/">Participant site</a></nav>
+  </div>
+</header>
+
+<main class="narrow">
+  <div class="card" style="max-width:440px;margin:60px auto 0">
+    <p class="eyebrow">Lab staff</p>
+    <h1 style="font-size:1.5rem">Sign in to the dashboard</h1>
+    <p class="field-note">
+      This dashboard holds participants' personal data. Do not sign in on a shared machine you
+      are about to walk away from, and do not export the register to a personal device.
+    </p>
+    <div id="login-message" class="message error" hidden></div>
+    <form id="login-form" novalidate>
+      <label class="field">Dashboard password
+        <input type="password" name="password" autocomplete="current-password" required autofocus>
+      </label>
+      <div class="button-row" style="margin-top:18px">
+        <button class="button primary" type="submit">Sign in</button>
+      </div>
+    </form>
+  </div>
+</main>
+
+</body>
+</html>

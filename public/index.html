@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Join the participant pool | Behavioural Research Lab, CHRIST Bangalore Yeshwanthpur</title>
+  <meta name="description" content="Register for the participant pool of the Behavioural Research Lab, Department of Economics, CHRIST (Deemed to be University), Bangalore Yeshwanthpur Campus.">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="wordmark" href="/">
+      <span class="lab">Behavioural Research Lab</span>
+      <span class="org">CHRIST (Deemed to be University), Bangalore Yeshwanthpur</span>
+    </a>
+    <nav aria-label="Sections">
+      <a href="#about">About</a>
+      <a href="#studies">Studies</a>
+      <a href="/privacy">Your data</a>
+      <a href="#join">Register</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===================== Landing ===================== -->
+  <section id="landing">
+    <div class="hero">
+      <p class="eyebrow">Participant pool</p>
+      <h1>Take part in research at the Behavioural Research Lab</h1>
+      <p class="lede">
+        The Department of Economics runs studies on how people decide: about money, risk,
+        trust, information and each other. Sessions are short, they are paid, and they run
+        on campus. Register once to join the pool, then pick a session time for any study
+        you are eligible for.
+      </p>
+      <div class="button-row">
+        <a class="button primary" href="#join">Register for the pool</a>
+        <a class="button secondary" href="#signin">I have registered before</a>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card" id="about">
+        <p class="eyebrow">What taking part involves</p>
+        <h2>What happens in a session</h2>
+        <ul class="plain">
+          <li>You arrive at the lab at your booked time and show your student or photo ID at check-in.</li>
+          <li>A research assistant gives you an information sheet and takes your written consent. You can read it and ask anything before you agree.</li>
+          <li>You complete a task on a computer, usually decisions with money at stake. Most sessions run between 30 and 60 minutes.</li>
+          <li>You are paid at the end, by UPI, and you sign for it.</li>
+          <li>You can stop at any point and still receive the show-up payment. Nobody will ask you to justify it.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <p class="eyebrow">Before you register</p>
+        <h2>Who can join</h2>
+        <ul class="plain">
+          <li>You are 18 or over.</li>
+          <li>You can travel to the Bangalore Yeshwanthpur campus for a session.</li>
+          <li>You can read and follow instructions in English. Some studies also run in Kannada or Hindi.</li>
+        </ul>
+        <p class="field-note" style="margin-bottom:0">
+          Individual studies set their own criteria on top of these, for example an age band
+          or a particular course of study. The system tells you which studies you can take
+          once you have registered.
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="eyebrow">The rules of the pool</p>
+      <h2>What the lab asks of you</h2>
+      <div class="grid-3">
+        <div class="fact">
+          <span class="value">Once</span>
+          <span class="label">Each person may take a given study one time only</span>
+        </div>
+        <div class="fact">
+          <span class="value" id="rule-gap">30 days</span>
+          <span class="label">Minimum wait between two different studies</span>
+        </div>
+        <div class="fact">
+          <span class="value" id="rule-noshow">2 no-shows</span>
+          <span class="label">Unexplained absences before your membership is paused</span>
+        </div>
+      </div>
+      <p class="field-note" style="margin-top:16px; margin-bottom:0">
+        The waiting period exists because somebody who played one decision task last week
+        arrives at the next one already knowing its shape, and that changes the result. If
+        you cannot make a session, cancel it on this site and it does not count against you.
+      </p>
+    </div>
+
+    <div class="card" id="studies">
+      <p class="eyebrow">Recruiting now</p>
+      <h2>Studies open for sign-up</h2>
+      <div id="public-studies" class="loading">Loading.</div>
+    </div>
+
+    <!-- ===================== Register ===================== -->
+    <div class="card" id="join">
+      <p class="eyebrow">Step 1 of 2</p>
+      <h2>Register for the participant pool</h2>
+      <p class="field-note">
+        This puts your details on the lab's register. It does not book you into anything.
+        Once you have registered you will see the studies you can take and can choose a time.
+      </p>
+
+      <div id="register-message" class="message error" hidden></div>
+
+      <form id="register-form" novalidate>
+        <fieldset>
+          <legend>How the lab reaches you</legend>
+          <p class="field-note">Your email address and mobile number are also how you sign back in later, so use ones you will keep.</p>
+          <div class="form-grid">
+            <label class="field">Full name
+              <input type="text" name="name" autocomplete="name" required placeholder="As it appears on your ID">
+            </label>
+            <label class="field">Mobile number
+              <input type="tel" name="phone" inputmode="numeric" autocomplete="tel" required placeholder="10 digits">
+            </label>
+            <label class="field wide">Email address
+              <input type="email" name="email" autocomplete="email" required placeholder="you@example.edu">
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>About you</legend>
+          <p class="field-note">
+            These answers decide which studies you are shown. The lab collects nothing here
+            that a study does not use to select participants or to check that its sample is balanced.
+          </p>
+          <div class="form-grid">
+            <label class="field">Year of birth
+              <input type="number" name="yearOfBirth" inputmode="numeric" required placeholder="2004" min="1930" max="2010">
+            </label>
+            <label class="field">Gender <span class="optional">(optional)</span>
+              <select name="gender">
+                <option value="">Prefer not to say</option>
+                <option>Woman</option>
+                <option>Man</option>
+                <option>Non-binary</option>
+                <option>Other</option>
+              </select>
+            </label>
+            <div class="wide">
+              <span class="field" style="display:block">Are you currently enrolled as a student?</span>
+              <div class="radio-row">
+                <label><input type="radio" name="isStudent" value="yes" checked> Yes</label>
+                <label><input type="radio" name="isStudent" value="no"> No</label>
+              </div>
+            </div>
+            <label class="field">Institution
+              <input type="text" name="institution" autocomplete="organization" placeholder="College or university">
+            </label>
+            <label class="field">Department or course
+              <input type="text" name="department" placeholder="For example, Economics">
+            </label>
+            <label class="field">Level
+              <select name="programme">
+                <option value="">Select</option>
+                <option>Undergraduate</option>
+                <option>Postgraduate</option>
+                <option>MPhil or PhD</option>
+                <option>Staff</option>
+                <option>Not a student</option>
+              </select>
+            </label>
+            <label class="field">Year of study <span class="optional">(optional)</span>
+              <input type="text" name="yearOfStudy" placeholder="For example, 2nd year">
+            </label>
+            <div class="wide">
+              <span class="field" style="display:block">Languages you can complete a task in</span>
+              <div class="radio-row" style="margin-top:8px">
+                <label><input type="checkbox" name="languages" value="English" checked> English</label>
+                <label><input type="checkbox" name="languages" value="Kannada"> Kannada</label>
+                <label><input type="checkbox" name="languages" value="Hindi"> Hindi</label>
+                <label><input type="checkbox" name="languages" value="Tamil"> Tamil</label>
+                <label><input type="checkbox" name="languages" value="Telugu"> Telugu</label>
+                <label><input type="checkbox" name="languages" value="Malayalam"> Malayalam</label>
+              </div>
+            </div>
+            <label class="field wide">How did you hear about the lab? <span class="optional">(optional)</span>
+              <input type="text" name="howHeard" placeholder="Poster, a class, a friend, social media">
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Consent to join the pool</legend>
+          <label class="check">
+            <input type="checkbox" name="confirmAdult" required>
+            <span>I confirm I am 18 years of age or older. I understand my age is checked against photo ID when I arrive at a session.</span>
+          </label>
+          <label class="check consent">
+            <input type="checkbox" name="consent" required>
+            <span>
+              I agree that the Department of Economics may hold the details above on its
+              participant register and contact me about studies I am eligible for. I have read
+              <a href="/privacy" target="_blank" rel="noopener">how the lab handles my data</a>,
+              including how to have my details removed. I understand that joining the pool is
+              not consent to any particular study: consent for a study is taken separately, in
+              writing, before that session begins.
+            </span>
+          </label>
+        </fieldset>
+
+        <div class="button-row">
+          <button class="button primary" type="submit" id="register-submit">Register</button>
+          <a class="button secondary" href="#signin">I have registered before</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- ===================== Sign in ===================== -->
+    <div class="card" id="signin">
+      <p class="eyebrow">Already on the register</p>
+      <h2>Sign in to book or change a session</h2>
+      <p class="field-note">Use the email address and mobile number you registered with. Both have to match the same record.</p>
+      <div id="signin-message" class="message error" hidden></div>
+      <form id="signin-form" novalidate>
+        <div class="form-grid">
+          <label class="field">Email address
+            <input type="email" name="email" autocomplete="email" required>
+          </label>
+          <label class="field">Mobile number
+            <input type="tel" name="phone" inputmode="numeric" autocomplete="tel" required>
+          </label>
+        </div>
+        <div class="button-row" style="margin-top:16px">
+          <button class="button primary" type="submit">Sign in</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===================== Portal ===================== -->
+  <section id="portal" hidden>
+    <div class="hero">
+      <p class="eyebrow">Participant <span id="portal-code"></span></p>
+      <h1 id="portal-greeting">Your sessions</h1>
+      <div id="portal-standing"></div>
+      <div class="button-row">
+        <button class="button secondary" type="button" id="refresh-portal">Refresh</button>
+        <button class="button secondary" type="button" id="signout">Sign out</button>
+      </div>
+    </div>
+
+    <div id="portal-message" class="message" hidden></div>
+
+    <div class="card">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">Your bookings</p>
+          <h2>Sessions you have booked</h2>
+        </div>
+      </div>
+      <div id="my-bookings"></div>
+    </div>
+
+    <div class="card">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">Open for sign-up</p>
+          <h2>Studies you can take</h2>
+        </div>
+      </div>
+      <div id="portal-studies"></div>
+    </div>
+
+    <div class="card flat">
+      <p class="eyebrow">Leaving</p>
+      <h2>Withdraw from the pool</h2>
+      <p class="field-note">
+        This releases any seat you hold and stops the lab contacting you about studies. Your
+        details stay on the register as a withdrawn record unless you ask the lab to erase
+        them, which you can do at any time and without giving a reason. See
+        <a href="/privacy">how the lab handles your data</a>.
+      </p>
+      <button class="button danger" type="button" id="withdraw">Withdraw from the pool</button>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>Behavioural Research Lab</strong>, Department of Economics, CHRIST (Deemed to be University), Bangalore Yeshwanthpur Campus.</p>
+    <p>Questions about a session or your record: contact the Lab Manager. <a href="/privacy">How the lab handles your data</a>. <a href="/admin">Lab staff sign-in</a>.</p>
+    <p id="consent-version-note"></p>
+  </div>
+</footer>
+
+</body>
+</html>

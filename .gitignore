@@ -1,0 +1,14 @@
+node_modules/
+.vercel/
+
+# Secrets. .env.example is the committed template and is kept.
+.env
+.env*.local
+.env.*
+!.env.example
+
+# The deployment details that were taken out of DEPLOY.md when this was published.
+HANDOVER-PRIVATE.md
+
+*.log
+.DS_Store
