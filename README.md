@@ -83,7 +83,7 @@ Then open `http://localhost:3400`, and the dashboard at
 | `npm run db:init` | Applies the schema. Idempotent, safe to replay against a live database |
 | `npm run db:status` | What is in the database now, and a warning if any study is open without an ethics reference |
 | `npm run db:seed` | Two dry-run studies with session times, for rehearsing the flow |
-| `npm run db:teardown -- yes` | Deletes every participant, study, session and booking. Keeps the pool rules |
+| `npm run db:teardown -- yes` | Deletes every participant, study, session and booking. Keeps the pool rules. **Never against the live database now that registration is open** |
 | `npm run dev` | Local server on port 3400 |
 
 `npm run check` is the one that matters. The pool rules fail silently: a page
@@ -133,12 +133,14 @@ Lab Operations Manual.
    drafts** and carry a "Draft" banner. They issue in final form with the RCEC
    approval for the pool. The version string recorded against each registration
    is set in the dashboard under Pool rules.
-2. **Pool registration is closed** on the deployed site, so nobody can enter
-   personal data into a system whose consent text is not approved. One toggle
-   in Pool rules opens it.
-3. **The two seeded studies carry the reference `RCEC/2026/DRY-RUN`.** They
-   exist to rehearse the flow. Delete them before real recruitment opens:
-   `npm run db:teardown -- yes`.
+2. **Pool registration is open under the draft consent text**, since
+   31 August 2026. Every registration records the consent version
+   `v1 (draft, pending RCEC)`, which is how those participants can be found and
+   re-consented if the approved wording differs.
+3. **The two seeded studies carry the reference `RCEC/2026/DRY-RUN`** and are
+   open, so a real registrant can book onto one. Close them in the dashboard
+   before real recruitment. Do not use `db:teardown`, which would also delete
+   the real registrations.
 4. **The lab email address** for erasure, correction and access requests does
    not exist yet. The privacy notice says so rather than giving an address that
    bounces.
