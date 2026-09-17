@@ -51,24 +51,22 @@ before you finish.
 
 ### Who can deploy
 
-The Vercel project is on a Hobby plan and this repository is private. On that
-combination, Vercel only deploys commits whose author is the owner of the Vercel
-account. A collaborator can push to `main` and the code will be on GitHub, but
-Vercel will block the deployment and the live site will not change. See Vercel's
-[Troubleshoot project collaboration](https://vercel.com/docs/deployments/troubleshoot-project-collaboration).
+Anyone with push access to this repository. It is public, and the Vercel project
+is on a Hobby plan, which does not restrict deployments from collaborators on
+public repositories. It would on a private one: on Hobby, a private repository
+only deploys commits authored by the account owner. **Do not make this
+repository private again** without moving the project to a Vercel Pro team, or
+every collaborator's push will stop going live without any error they would see.
+See Vercel's [Troubleshoot project collaboration](https://vercel.com/docs/deployments/troubleshoot-project-collaboration).
 
-There are two ways round it:
+Being public means anyone can read the code, including changes in progress.
+Nothing secret belongs in it: credentials live in the Vercel project's
+environment variables, and deployment details in the handover note held by the
+department. Never commit `.env.local`.
 
-- Make this repository public (`gh repo edit --visibility public
-  --accept-visibility-change-consequences`). Vercel does not restrict
-  collaboration on public repositories. No credentials are in the repository,
-  so nothing secret becomes visible.
-- Move the project to a Vercel Pro team and add each maintainer as a team member.
-  This is a paid plan.
-
-Whoever commits also needs the email in `git config user.email` to be a verified
+Whoever commits needs the email in `git config user.email` to be a verified
 email on their GitHub account, or Vercel cannot tell who wrote the commit and
-blocks it regardless of plan.
+may block the deployment.
 
 ### Deploying without Git
 
