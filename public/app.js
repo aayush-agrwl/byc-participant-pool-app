@@ -8,6 +8,7 @@
 // ---------------------------------------------------------------------------
 
 const TOKEN_KEY = "brl_participant_token";
+const FLASH_KEY = "brl_flash";
 
 const $  = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -49,13 +50,22 @@ function text(value) {
 
 function showMessage(selector, kind, message) {
   const node = $(selector);
+  if (!node) return;
   node.className = `message ${kind}`;
   node.innerHTML = message;
   node.hidden = false;
   node.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-function hideMessage(selector) { $(selector).hidden = true; }
+function hideMessage(selector) {
+  const node = $(selector);
+  if (node) node.hidden = true;
+}
+
+function setText(selector, value) {
+  const node = $(selector);
+  if (node) node.textContent = value;
+}
 
 // ---------------------------------------------------------------------------
 // Landing page
@@ -66,17 +76,19 @@ async function loadConfig() {
     const config = await api("/api/config");
     state.config = config;
 
-    $("#rule-gap").textContent    = `${config.minDaysBetweenStudies} days`;
-    $("#rule-noshow").textContent = `${config.noShowsBeforeSuspension} no-shows`;
-    $("#consent-version-note").textContent = `Pool consent text ${config.consentVersion}.`;
+        setText("#rule-gap",    `${config.minDaysBetweenStudies} days`);
+    setText("#rule-noshow", `${config.noShowsBeforeSuspension} no-shows`);
+    setText("#consent-version-note", `Pool consent text ${config.consentVersion}.`);
 
     if (!config.poolOpen) {
       showMessage("#register-message", "warn",
         "Registration for the pool is closed at the moment. The page will accept sign-ups again when the lab reopens it.");
-      $("#register-submit").disabled = true;
+            const submit = $("#register-submit");
+      if (submit) submit.disabled = true;
     }
 
     const container = $("#public-studies");
+        if (!container) return;
     container.classList.remove("loading");
     if (config.studies.length === 0) {
       container.innerHTML = `<p class="field-note" style="margin:0">
@@ -104,7 +116,7 @@ async function loadConfig() {
       </div>
     `).join("");
   } catch {
-    $("#public-studies").textContent = "The study list could not be loaded. Please refresh the page.";
+       setText("#public-studies", "The study list could not be loaded. Please refresh the page.");
   }
 }
 
@@ -141,10 +153,12 @@ async function handleRegister(event) {
   try {
     const result = await api("/api/register", { method: "POST", body: registrationPayload(event.target) });
     setToken(result.token);
+    sessionStorage.setItem(FLASH_KEY, JSON.stringify({
+      kind: "success",
+      html: `You are on the register as <strong>${text(result.participant.code)}</strong>. Keep that reference: the lab uses it instead of your name. Pick a session below when you are ready.`,
+    }));
     applyPortal(result);
-    showMessage("#portal-message", "success",
-      `You are on the register as <strong>${text(result.participant.code)}</strong>. Keep that reference: the lab uses it instead of your name. Pick a session below when you are ready.`);
-  } catch (error) {
+    } catch (error) {
     showMessage("#register-message", "error", text(error.message));
   } finally {
     button.disabled = false;
@@ -152,15 +166,36 @@ async function handleRegister(event) {
   }
 }
 
+let pendingEmail = "";
+
 async function handleSignIn(event) {
   event.preventDefault();
   hideMessage("#signin-message");
-  const data = new FormData(event.target);
+  const email = String(new FormData(event.target).get("email") || "").trim();
   try {
-    const result = await api("/api/lookup", {
-      method: "POST",
-      body: { email: (data.get("email") || "").trim(), phone: (data.get("phone") || "").trim() },
-    });
+    const result = await api("/api/login/request", { method: "POST", body: { email } });
+    pendingEmail = email;
+    $("#signin-form").hidden = true;
+    $("#code-form").hidden = false;
+    setText("#code-sent-note", result.message);
+    if (result.devCode) {
+      const note = $("#code-test-note");
+      if (note) {
+        note.textContent = `Test mode: your code is ${result.devCode}. Turn test mode off before the site goes live.`;
+        note.hidden = false;
+      }
+    }
+  } catch (error) {
+    showMessage("#signin-message", "error", text(error.message));
+  }
+}
+
+async function handleVerifyCode(event) {
+  event.preventDefault();
+  hideMessage("#signin-message");
+  const code = String(new FormData(event.target).get("code") || "").trim();
+  try {
+    const result = await api("/api/login/verify", { method: "POST", body: { email: pendingEmail, code } });
     setToken(result.token);
     applyPortal(result);
   } catch (error) {
@@ -168,9 +203,26 @@ async function handleSignIn(event) {
   }
 }
 
+function backToEmail() {
+  pendingEmail = "";
+  $("#code-form").hidden = true;
+  $("#signin-form").hidden = false;
+  const note = $("#code-test-note");
+  if (note) note.hidden = true;
+  hideMessage("#signin-message");
+}
+
 // ---------------------------------------------------------------------------
 // Portal
 // ---------------------------------------------------------------------------
+
+function showFlash() {
+  const raw = sessionStorage.getItem(FLASH_KEY);
+  if (!raw) return;
+  sessionStorage.removeItem(FLASH_KEY);
+  const flash = JSON.parse(raw);
+  showMessage("#portal-message", flash.kind, flash.html);
+}
 
 function applyPortal(payload) {
   state.participant = payload.participant;
@@ -178,10 +230,15 @@ function applyPortal(payload) {
   state.bookings    = payload.bookings || [];
   if (payload.token) setToken(payload.token);
 
+  if (!$("#portal")) {
+    window.location.href = "/";
+    return;
+  }
   $("#landing").hidden = true;
-  $("#portal").hidden  = false;
+  $("#portal").hidden = false;
   window.scrollTo({ top: 0 });
   renderPortal();
+    showFlash();
 }
 
 function renderPortal() {
@@ -208,6 +265,7 @@ function renderPortal() {
 
   renderBookings();
   renderStudies();
+    renderDetails();
 }
 
 function renderBookings() {
@@ -348,7 +406,51 @@ function renderStudies() {
 // ---------------------------------------------------------------------------
 // Actions
 // ---------------------------------------------------------------------------
+function renderDetails() {
+  const form = $("#details-form");
+  if (!form) return;
+  const p = state.participant;
+  const field = (name) => form.querySelector(`[name="${name}"]`);
 
+  field("name").value        = p.name || "";
+  field("institution").value = p.institution || "";
+  field("department").value  = p.department || "";
+  field("programme").value   = p.programme || "";
+
+  // Records saved before the change may hold "Woman" or "Man". Add them as
+  // options so the page shows the value that is actually stored.
+  const gender = field("gender");
+  if (p.gender && !Array.from(gender.options).some((o) => o.value === p.gender)) {
+    gender.add(new Option(p.gender, p.gender));
+  }
+  gender.value = p.gender || "";
+}
+
+async function handleDetails(event) {
+  event.preventDefault();
+  hideMessage("#details-message");
+  const data = new FormData(event.target);
+  const programme = (data.get("programme") || "").trim();
+  try {
+    const result = await api("/api/me/details", {
+      method: "POST",
+      body: {
+        token:       token(),
+        name:        (data.get("name") || "").trim(),
+        gender:      data.get("gender") || "",
+        isStudent:   programme !== "Not a student",
+        institution: (data.get("institution") || "").trim(),
+        department:  (data.get("department") || "").trim(),
+        programme,
+      },
+    });
+    applyPortal(result);
+    showMessage("#portal-message", "success", "Your details have been updated.");
+  } catch (error) {
+    if (error.status === 401) return signOut();
+    showMessage("#details-message", "error", text(error.message));
+  }
+}
 async function bookSeat(studyId, button) {
   const study = state.studies.find((s) => s.id === studyId);
   const note  = $(`#study-msg-${studyId}`);
@@ -436,11 +538,20 @@ function signOut() {
 // Start
 // ---------------------------------------------------------------------------
 
-$("#register-form").addEventListener("submit", handleRegister);
-$("#signin-form").addEventListener("submit", handleSignIn);
-$("#refresh-portal").addEventListener("click", refreshPortal);
-$("#signout").addEventListener("click", signOut);
-$("#withdraw").addEventListener("click", handleWithdraw);
+// Attach each handler only if its element exists on this page.
+function on(selector, event, handler) {
+  const node = $(selector);
+  if (node) node.addEventListener(event, handler);
+}
 
-loadConfig();
-if (token()) refreshPortal();
+on("#register-form", "submit", handleRegister);
+on("#signin-form", "submit", handleSignIn);
+on("#code-form", "submit", handleVerifyCode);
+on("#code-back", "click", backToEmail);
+on("#refresh-portal", "click", refreshPortal);
+on("#signout", "click", signOut);
+on("#withdraw", "click", handleWithdraw);
+on("#details-form", "submit", handleDetails);
+
+if ($("#rule-gap") || $("#public-studies") || $("#register-form")) loadConfig();
+if (token() && $("#portal")) refreshPortal();

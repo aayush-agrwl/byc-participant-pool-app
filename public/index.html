@@ -12,15 +12,21 @@
 
 <header class="site-header">
   <div class="inner">
-    <a class="wordmark" href="/">
-      <span class="lab">Behavioural Research Lab</span>
+      <a class="wordmark" href="/">
+      <span class="brand-logos">
+        <img src="/images/bidlab-logo.png" alt="BIDLAB, Behavioural Insights and Decisions Lab" height="44">
+        <span class="divider" aria-hidden="true"></span>
+        <img class="christ" src="/images/christ-logo.png" alt="CHRIST (Deemed to be University)" height="40">
+      </span>
+            <span class="lab">Behavioural Insights and Decisions Lab</span>
       <span class="org">CHRIST (Deemed to be University), Bangalore Yeshwanthpur</span>
     </a>
     <nav aria-label="Sections">
-      <a href="#about">About</a>
-      <a href="#studies">Studies</a>
+      <a href="/#studies">Studies</a>
+      <a href="/about">About</a>
       <a href="/privacy">Your data</a>
-      <a href="#join">Register</a>
+      <a href="/register">Register</a>
+      <a href="/signin">Sign in</a>
     </nav>
   </div>
 </header>
@@ -39,39 +45,11 @@
         you are eligible for.
       </p>
       <div class="button-row">
-        <a class="button primary" href="#join">Register for the pool</a>
-        <a class="button secondary" href="#signin">I have registered before</a>
+        <a class="button primary" href="/register">Register for the pool</a>
+        <a class="button secondary" href="/signin">I have registered before</a>
       </div>
     </div>
 
-    <div class="grid-2">
-      <div class="card" id="about">
-        <p class="eyebrow">What taking part involves</p>
-        <h2>What happens in a session</h2>
-        <ul class="plain">
-          <li>You arrive at the lab at your booked time and show your student or photo ID at check-in.</li>
-          <li>A research assistant gives you an information sheet and takes your written consent. You can read it and ask anything before you agree.</li>
-          <li>You complete a task on a computer, usually decisions with money at stake. Most sessions run between 30 and 60 minutes.</li>
-          <li>You are paid at the end, by UPI, and you sign for it.</li>
-          <li>You can stop at any point and still receive the show-up payment. Nobody will ask you to justify it.</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <p class="eyebrow">Before you register</p>
-        <h2>Who can join</h2>
-        <ul class="plain">
-          <li>You are 18 or over.</li>
-          <li>You can travel to the Bangalore Yeshwanthpur campus for a session.</li>
-          <li>You can read and follow instructions in English. Some studies also run in Kannada or Hindi.</li>
-        </ul>
-        <p class="field-note" style="margin-bottom:0">
-          Individual studies set their own criteria on top of these, for example an age band
-          or a particular course of study. The system tells you which studies you can take
-          once you have registered.
-        </p>
-      </div>
-    </div>
 
     <div class="card">
       <p class="eyebrow">The rules of the pool</p>
@@ -103,142 +81,7 @@
       <div id="public-studies" class="loading">Loading.</div>
     </div>
 
-    <!-- ===================== Register ===================== -->
-    <div class="card" id="join">
-      <p class="eyebrow">Step 1 of 2</p>
-      <h2>Register for the participant pool</h2>
-      <p class="field-note">
-        This puts your details on the lab's register. It does not book you into anything.
-        Once you have registered you will see the studies you can take and can choose a time.
-      </p>
-
-      <div id="register-message" class="message error" hidden></div>
-
-      <form id="register-form" novalidate>
-        <fieldset>
-          <legend>How the lab reaches you</legend>
-          <p class="field-note">Your email address and mobile number are also how you sign back in later, so use ones you will keep.</p>
-          <div class="form-grid">
-            <label class="field">Full name
-              <input type="text" name="name" autocomplete="name" required placeholder="As it appears on your ID">
-            </label>
-            <label class="field">Mobile number
-              <input type="tel" name="phone" inputmode="numeric" autocomplete="tel" required placeholder="10 digits">
-            </label>
-            <label class="field wide">Email address
-              <input type="email" name="email" autocomplete="email" required placeholder="you@example.edu">
-            </label>
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend>About you</legend>
-          <p class="field-note">
-            These answers decide which studies you are shown. The lab collects nothing here
-            that a study does not use to select participants or to check that its sample is balanced.
-          </p>
-          <div class="form-grid">
-            <label class="field">Year of birth
-              <input type="number" name="yearOfBirth" inputmode="numeric" required placeholder="2004" min="1930" max="2010">
-            </label>
-            <label class="field">Gender <span class="optional">(optional)</span>
-              <select name="gender">
-                <option value="">Prefer not to say</option>
-                <option>Woman</option>
-                <option>Man</option>
-                <option>Non-binary</option>
-                <option>Other</option>
-              </select>
-            </label>
-            <div class="wide">
-              <span class="field" style="display:block">Are you currently enrolled as a student?</span>
-              <div class="radio-row">
-                <label><input type="radio" name="isStudent" value="yes" checked> Yes</label>
-                <label><input type="radio" name="isStudent" value="no"> No</label>
-              </div>
-            </div>
-            <label class="field">Institution
-              <input type="text" name="institution" autocomplete="organization" placeholder="College or university">
-            </label>
-            <label class="field">Department or course
-              <input type="text" name="department" placeholder="For example, Economics">
-            </label>
-            <label class="field">Level
-              <select name="programme">
-                <option value="">Select</option>
-                <option>Undergraduate</option>
-                <option>Postgraduate</option>
-                <option>MPhil or PhD</option>
-                <option>Staff</option>
-                <option>Not a student</option>
-              </select>
-            </label>
-            <label class="field">Year of study <span class="optional">(optional)</span>
-              <input type="text" name="yearOfStudy" placeholder="For example, 2nd year">
-            </label>
-            <div class="wide">
-              <span class="field" style="display:block">Languages you can complete a task in</span>
-              <div class="radio-row" style="margin-top:8px">
-                <label><input type="checkbox" name="languages" value="English" checked> English</label>
-                <label><input type="checkbox" name="languages" value="Kannada"> Kannada</label>
-                <label><input type="checkbox" name="languages" value="Hindi"> Hindi</label>
-                <label><input type="checkbox" name="languages" value="Tamil"> Tamil</label>
-                <label><input type="checkbox" name="languages" value="Telugu"> Telugu</label>
-                <label><input type="checkbox" name="languages" value="Malayalam"> Malayalam</label>
-              </div>
-            </div>
-            <label class="field wide">How did you hear about the lab? <span class="optional">(optional)</span>
-              <input type="text" name="howHeard" placeholder="Poster, a class, a friend, social media">
-            </label>
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend>Consent to join the pool</legend>
-          <label class="check">
-            <input type="checkbox" name="confirmAdult" required>
-            <span>I confirm I am 18 years of age or older. I understand my age is checked against photo ID when I arrive at a session.</span>
-          </label>
-          <label class="check consent">
-            <input type="checkbox" name="consent" required>
-            <span>
-              I agree that the Department of Economics may hold the details above on its
-              participant register and contact me about studies I am eligible for. I have read
-              <a href="/privacy" target="_blank" rel="noopener">how the lab handles my data</a>,
-              including how to have my details removed. I understand that joining the pool is
-              not consent to any particular study: consent for a study is taken separately, in
-              writing, before that session begins.
-            </span>
-          </label>
-        </fieldset>
-
-        <div class="button-row">
-          <button class="button primary" type="submit" id="register-submit">Register</button>
-          <a class="button secondary" href="#signin">I have registered before</a>
-        </div>
-      </form>
-    </div>
-
-    <!-- ===================== Sign in ===================== -->
-    <div class="card" id="signin">
-      <p class="eyebrow">Already on the register</p>
-      <h2>Sign in to book or change a session</h2>
-      <p class="field-note">Use the email address and mobile number you registered with. Both have to match the same record.</p>
-      <div id="signin-message" class="message error" hidden></div>
-      <form id="signin-form" novalidate>
-        <div class="form-grid">
-          <label class="field">Email address
-            <input type="email" name="email" autocomplete="email" required>
-          </label>
-          <label class="field">Mobile number
-            <input type="tel" name="phone" inputmode="numeric" autocomplete="tel" required>
-          </label>
-        </div>
-        <div class="button-row" style="margin-top:16px">
-          <button class="button primary" type="submit">Sign in</button>
-        </div>
-      </form>
-    </div>
+   
   </section>
 
   <!-- ===================== Portal ===================== -->
@@ -275,7 +118,50 @@
       <div id="portal-studies"></div>
     </div>
 
-    <div class="card flat">
+    
+          <div class="card">
+      <p class="eyebrow">Your record</p>
+      <h2>Correct my details</h2>
+      <p class="field-note">
+        You can correct your name, gender, student status and course here. To change your
+        email, mobile number or year of birth, write to the Lab Manager.
+      </p>
+      <div id="details-message" class="message error" hidden></div>
+      <form id="details-form" novalidate>
+        <div class="form-grid">
+          <label class="field">Full name
+            <input type="text" name="name" autocomplete="name" required>
+          </label>
+          <label class="field">Gender <span class="optional">(optional)</span>
+            <select name="gender">
+              <option value="">Prefer not to say</option>
+              <option value="Female">Female</option>
+              <option value="Male">Male</option>
+            </select>
+          </label>
+          <label class="field">Institution
+            <input type="text" name="institution">
+          </label>
+          <label class="field">Department or course
+            <input type="text" name="department">
+          </label>
+          <label class="field">Level
+            <select name="programme">
+              <option value="">Select</option>
+              <option>Undergraduate</option>
+              <option>Postgraduate</option>
+              <option>MPhil or PhD</option>
+              <option>Staff</option>
+              <option>Not a student</option>
+            </select>
+          </label>
+        </div>
+        <div class="button-row" style="margin-top:16px">
+          <button class="button primary" type="submit">Save my details</button>
+        </div>
+      </form>
+    </div>
+       <div class="card flat">
       <p class="eyebrow">Leaving</p>
       <h2>Withdraw from the pool</h2>
       <p class="field-note">

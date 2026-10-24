@@ -127,4 +127,17 @@ export const statements = [
      detail      TEXT         NOT NULL DEFAULT '',
      created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
    )`,
+     // -- One-time sign-in codes -----------------------------------------------
+  // Only a hash of each code is stored. A code is single use, expires, and is
+  // locked after too many wrong attempts.
+  `CREATE TABLE IF NOT EXISTS login_codes (
+     id          SERIAL       PRIMARY KEY,
+     email       TEXT         NOT NULL,
+     code_hash   TEXT         NOT NULL,
+     attempts    INTEGER      NOT NULL DEFAULT 0,
+     expires_at  TIMESTAMPTZ  NOT NULL,
+     used_at     TIMESTAMPTZ,
+     created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+   )`,
+  `CREATE INDEX IF NOT EXISTS login_codes_email_idx ON login_codes (LOWER(email), created_at)`,
 ];

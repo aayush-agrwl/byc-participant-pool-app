@@ -578,3 +578,36 @@ export async function listActivity(sql, limit = 100) {
     ORDER BY id DESC LIMIT ${limit}
   `;
 }
+export async function updateParticipantDetails(sql, id, d) {
+  await sql`
+    UPDATE participants
+    SET name        = ${d.name},
+        gender      = ${d.gender},
+        is_student  = ${d.isStudent},
+        institution = ${d.institution},
+        department  = ${d.department},
+        programme   = ${d.programme}
+    WHERE id = ${id}
+  `;
+}
+export async function createLoginCode(sql, email, codeHash, expiresAt) {
+  await sql`DELETE FROM login_codes WHERE LOWER(email) = LOWER(${email})`;
+  await sql`INSERT INTO login_codes (email, code_hash, expires_at)
+            VALUES (${email}, ${codeHash}, ${expiresAt})`;
+}
+
+export async function getLatestLoginCode(sql, email) {
+  const rows = await sql`SELECT * FROM login_codes
+                         WHERE LOWER(email) = LOWER(${email})
+                         ORDER BY created_at DESC, id DESC
+                         LIMIT 1`;
+  return rows[0] || null;
+}
+
+export async function recordLoginAttempt(sql, id) {
+  await sql`UPDATE login_codes SET attempts = attempts + 1 WHERE id = ${id}`;
+}
+
+export async function markLoginCodeUsed(sql, id) {
+  await sql`UPDATE login_codes SET used_at = NOW() WHERE id = ${id}`;
+}

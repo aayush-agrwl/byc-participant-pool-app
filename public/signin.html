@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in | Behavioural Research Lab, CHRIST Bangalore Yeshwanthpur</title>
+  <meta name="description" content="Sign in to book or change a session in the participant pool of the Behavioural Research Lab.">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="inner">
+    <a class="wordmark" href="/">
+      <span class="brand-logos">
+        <img src="/images/bidlab-logo.png" alt="BIDLAB, Behavioural Insights and Decisions Lab" height="44">
+        <span class="divider" aria-hidden="true"></span>
+        <img class="christ" src="/images/christ-logo.png" alt="CHRIST (Deemed to be University)" height="40">
+      </span>
+         <span class="lab">Behavioural Insights and Decisions Lab</span>
+      <span class="org">CHRIST (Deemed to be University), Bangalore Yeshwanthpur</span>
+    </a>
+    <nav aria-label="Sections">
+      <a href="/#studies">Studies</a>
+      <a href="/about">About</a>
+      <a href="/privacy">Your data</a>
+      <a href="/register">Register</a>
+      <a href="/signin" aria-current="page">Sign in</a>
+    </nav>
+  </div>
+</header>
+
+<main class="narrow">
+  <div class="card">
+    <p class="eyebrow">Already on the register</p>
+    <h2>Sign in with a code</h2>
+    <p class="field-note">
+      Enter the email address you registered with, and we will send a six-digit code to it.
+      Students should use their CHRIST email address.
+    </p>
+    <div id="signin-message" class="message error" hidden></div>
+
+    <form id="signin-form" novalidate>
+      <label class="field">Email address
+        <input type="email" name="email" autocomplete="email" required>
+      </label>
+      <div class="button-row" style="margin-top:16px">
+        <button class="button primary" type="submit">Send code</button>
+      </div>
+    </form>
+
+    <form id="code-form" novalidate hidden>
+      <p class="field-note" id="code-sent-note"></p>
+      <div id="code-test-note" class="message info" hidden></div>
+      <label class="field">Six-digit code
+        <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required>
+      </label>
+      <div class="button-row" style="margin-top:16px">
+        <button class="button primary" type="submit">Sign in</button>
+        <button class="button secondary" type="button" id="code-back">Use a different email</button>
+      </div>
+    </form>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="inner">
+    <p><strong>Behavioural Research Lab</strong>, Department of Economics, CHRIST (Deemed to be University), Bangalore Yeshwanthpur Campus.</p>
+    <p>Questions about a session or your record: contact the Lab Manager. <a href="/privacy">How the lab handles your data</a>. <a href="/admin">Lab staff sign-in</a>.</p>
+    <p id="consent-version-note"></p>
+  </div>
+</footer>
+
+</body>
+</html>
