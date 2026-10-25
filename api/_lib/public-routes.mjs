@@ -97,6 +97,9 @@ async function studiesForParticipant(sql, participant, rules, now = new Date()) 
       maxAge:          study.maxAge,
       requiresStudent: study.requiresStudent,
       declarations:    study.declarations,
+            pretest: (await store.getPretest(sql, study.id)).map((q) => ({
+        id: q.id, text: q.text, options: q.options,
+      })),
       eligible:        assessment.eligible,
       reasons:         assessment.reasons,
       eligibleFrom:    assessment.eligibleFrom,
@@ -363,7 +366,21 @@ export async function handlePublic(req, res, pathname, sql) {
     if (required.length > 0 && (given.length !== required.length || !given.every(Boolean))) {
       return sendJson(res, 400, { error: "Please confirm every statement before booking your seat." });
     }
-
+    // Pretest: every question needs an answer, and each has one right option.
+    const questions = await store.getPretest(sql, session.study_id);
+    if (questions.length > 0) {
+      const answers = body.pretest || {};
+      if (questions.some((q) => answers[q.id] === undefined)) {
+        return sendJson(res, 400, { error: "Please answer every question in the short check." });
+      }
+      const passed = questions.every((q) => Number(answers[q.id]) === q.correct);
+      await store.recordPretest(sql, participant.id, session.study_id, passed);
+      if (!passed) {
+        const message = "You did not meet this study's requirements, so no seat has been booked. This does not count against you.";
+        return sendJson(res, 403, { error: message, reasons: [{ code: "pretest", message }] });
+      }
+    }
+    
     const seats = bookableSeats(session.capacity, session.buffer_percent);
     const result = await store.insertBooking(sql, {
       participantId: participant.id,

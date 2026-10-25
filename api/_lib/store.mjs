@@ -611,3 +611,13 @@ export async function recordLoginAttempt(sql, id) {
 export async function markLoginCodeUsed(sql, id) {
   await sql`UPDATE login_codes SET used_at = NOW() WHERE id = ${id}`;
 }
+
+export async function getPretest(sql, studyId) {
+  const rows = await sql`SELECT pretest FROM studies WHERE id = ${studyId}`;
+  return safeParse(rows[0]?.pretest, []);
+}
+
+export async function recordPretest(sql, participantId, studyId, passed) {
+  await sql`INSERT INTO pretest_responses (participant_id, study_id, passed)
+            VALUES (${participantId}, ${studyId}, ${passed})`;
+}

@@ -140,4 +140,15 @@ export const statements = [
      created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
    )`,
   `CREATE INDEX IF NOT EXISTS login_codes_email_idx ON login_codes (LOWER(email), created_at)`,
+  // -- Pretest questions and results ----------------------------------------
+  // The questions live on the study. Only pass or fail is kept per attempt,
+  // never the answers the participant gave.
+  `ALTER TABLE studies ADD COLUMN IF NOT EXISTS pretest TEXT NOT NULL DEFAULT '[]'`,
+  `CREATE TABLE IF NOT EXISTS pretest_responses (
+     id              SERIAL       PRIMARY KEY,
+     participant_id  INTEGER      NOT NULL REFERENCES participants(id) ON DELETE CASCADE,
+     study_id        INTEGER      NOT NULL REFERENCES studies(id) ON DELETE CASCADE,
+     passed          BOOLEAN      NOT NULL,
+     created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+   )`,
 ];

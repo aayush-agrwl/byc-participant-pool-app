@@ -378,6 +378,19 @@ function renderStudies() {
       </label>`;
     }).join("");
 
+        const pretest = !study.pretest || study.pretest.length === 0 ? "" : `
+      <h4 style="margin-top:22px">Short check for this study</h4>
+      <p class="field-note">Please answer each question. The study needs everyone taking part to meet its requirements.</p>
+      ${study.pretest.map((q) => `
+        <fieldset>
+          <legend>${text(q.text)}</legend>
+          <div class="radio-row">
+            ${q.options.map((option, i) => `
+              <label><input type="radio" name="pretest-${study.id}-${text(q.id)}" value="${i}"> ${text(option)}</label>
+            `).join("")}
+          </div>
+        </fieldset>`).join("")}`;
+
     const declarations = study.declarations.length === 0 ? "" : `
       <h4 style="margin-top:22px">Before you book, please confirm</h4>
       <p class="field-note">These are the checks this study needs from you. Answering honestly protects the study and the payment you are owed.</p>
@@ -390,7 +403,7 @@ function renderStudies() {
     return `<div class="study">${head}<div class="study-body">
       <h4>Choose a session time</h4>
       <div class="slot-list">${slots}</div>
-      ${declarations}
+            ${pretest}
       <div class="button-row" style="margin-top:20px">
         <button class="button primary" data-book="${study.id}" ${bookable ? "" : "disabled"}>Book this seat</button>
       </div>
@@ -461,6 +474,15 @@ async function bookSeat(studyId, button) {
     note.textContent = "Please choose a session time first.";
     return;
   }
+    const pretestAnswers = {};
+  for (const q of study.pretest || []) {
+    const chosenAnswer = document.querySelector(`input[name="pretest-${studyId}-${q.id}"]:checked`);
+    if (!chosenAnswer) {
+      note.textContent = "Please answer every question in the short check.";
+      return;
+    }
+    pretestAnswers[q.id] = Number(chosenAnswer.value);
+  }
   const boxes = $$(`input[data-declaration="${studyId}"]`);
   if (boxes.length > 0 && !boxes.every((box) => box.checked)) {
     note.textContent = "Please confirm every statement above before booking.";
@@ -476,6 +498,7 @@ async function bookSeat(studyId, button) {
         token: token(),
         sessionId: Number(chosen.value),
         declarations: study.declarations.map(() => true),
+                pretest: pretestAnswers,
       },
     });
     applyPortal(result);
