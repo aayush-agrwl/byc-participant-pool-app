@@ -6,6 +6,7 @@ import {
   sendJson, readJson, rateLimit, clientKey,
 } from "./http.mjs";
 import { issueParticipantToken, readParticipantToken } from "./tokens.mjs";
+import { newCode, hashCode, codeMatches, testModeOn, CODE_MINUTES, MAX_ATTEMPTS } from "./otp.mjs";
 import {
   assessEligibility, sessionConflict, conflictMessage, bookableSeats,
   isValidEmail, isValidPhone, normalisePhone, formatSessionTime,
@@ -28,6 +29,11 @@ function publicParticipant(p) {
     suspendedUntil:  p.suspendedUntil,
     noShowCount:     p.noShowCount,
     memberSince:     p.createdAt,
+    gender:          p.gender,
+    isStudent:       p.isStudent,
+    institution:     p.institution,
+    department:      p.department,
+    programme:       p.programme,
   };
 }
 
@@ -91,6 +97,9 @@ async function studiesForParticipant(sql, participant, rules, now = new Date()) 
       maxAge:          study.maxAge,
       requiresStudent: study.requiresStudent,
       declarations:    study.declarations,
+            pretest: (await store.getPretest(sql, study.id)).map((q) => ({
+        id: q.id, text: q.text, options: q.options,
+      })),
       eligible:        assessment.eligible,
       reasons:         assessment.reasons,
       eligibleFrom:    assessment.eligibleFrom,
@@ -232,6 +241,65 @@ export async function handlePublic(req, res, pathname, sql) {
     return sendJson(res, 200, await portalPayload(sql, participant, rules));
   }
 
+    // -- Sign-in by code, step 1: send the code --------------------------------
+  if (req.method === "POST" && pathname === "/api/login/request") {
+    const limit = rateLimit(clientKey(req, "login-request"), 5, 10 * 60_000);
+    if (!limit.allowed) {
+      return sendJson(res, 429, { error: "Too many codes requested from this connection. Please wait a few minutes." });
+    }
+    const body  = await readJson(req);
+    const email = String(body.email || "").trim().toLowerCase();
+    if (!isValidEmail(email)) {
+      return sendJson(res, 400, { error: "Please enter a valid email address." });
+    }
+
+    // The same reply whether or not the address is on the register, so the
+    // form cannot be used to find out who is in the pool.
+    const reply = {
+      message: `If that address is on the register, a six-digit code has been sent to it. It is valid for ${CODE_MINUTES} minutes.`,
+    };
+    const participant = await store.findParticipantByEmail(sql, email);
+    if (!participant) return sendJson(res, 200, reply);
+
+    const code = newCode();
+    await store.createLoginCode(sql, email, hashCode(email, code), new Date(Date.now() + CODE_MINUTES * 60_000));
+
+    if (testModeOn()) {
+      return sendJson(res, 200, { ...reply, devCode: code });
+    }
+    // Real email is added with the email service. Until then nothing is sent,
+    // and the log shows why.
+    console.error("No email provider is configured, so no sign-in code was sent.");
+    return sendJson(res, 200, reply);
+  }
+
+  // -- Sign-in by code, step 2: check the code -------------------------------
+  if (req.method === "POST" && pathname === "/api/login/verify") {
+    const limit = rateLimit(clientKey(req, "login-verify"), 20, 10 * 60_000);
+    if (!limit.allowed) {
+      return sendJson(res, 429, { error: "Too many attempts from this connection. Please try again shortly." });
+    }
+    const body  = await readJson(req);
+    const email = String(body.email || "").trim().toLowerCase();
+    const code  = String(body.code  || "").trim();
+    const refused = { error: "That code is not right, or it has expired. Request a new code and try again." };
+
+    const row = await store.getLatestLoginCode(sql, email);
+    if (!row || row.used_at || new Date(row.expires_at) < new Date() || row.attempts >= MAX_ATTEMPTS) {
+      return sendJson(res, 401, refused);
+    }
+    await store.recordLoginAttempt(sql, row.id);
+    if (!codeMatches(email, code, row.code_hash)) {
+      return sendJson(res, 401, refused);
+    }
+
+    const participant = await store.findParticipantByEmail(sql, email);
+    if (!participant) return sendJson(res, 401, refused);
+
+    await store.markLoginCodeUsed(sql, row.id);
+    await store.logActivity(sql, "participant_signed_in", participant.code);
+    return sendJson(res, 200, await portalPayload(sql, participant, rules));
+  }
   // -- Refresh the portal ----------------------------------------------------
   if (req.method === "POST" && pathname === "/api/me") {
     const participant = await authenticate(sql, await readJson(req));
@@ -298,7 +366,21 @@ export async function handlePublic(req, res, pathname, sql) {
     if (required.length > 0 && (given.length !== required.length || !given.every(Boolean))) {
       return sendJson(res, 400, { error: "Please confirm every statement before booking your seat." });
     }
-
+    // Pretest: every question needs an answer, and each has one right option.
+    const questions = await store.getPretest(sql, session.study_id);
+    if (questions.length > 0) {
+      const answers = body.pretest || {};
+      if (questions.some((q) => answers[q.id] === undefined)) {
+        return sendJson(res, 400, { error: "Please answer every question in the short check." });
+      }
+      const passed = questions.every((q) => Number(answers[q.id]) === q.correct);
+      await store.recordPretest(sql, participant.id, session.study_id, passed);
+      if (!passed) {
+        const message = "You did not meet this study's requirements, so no seat has been booked. This does not count against you.";
+        return sendJson(res, 403, { error: message, reasons: [{ code: "pretest", message }] });
+      }
+    }
+    
     const seats = bookableSeats(session.capacity, session.buffer_percent);
     const result = await store.insertBooking(sql, {
       participantId: participant.id,
@@ -351,6 +433,48 @@ export async function handlePublic(req, res, pathname, sql) {
     return sendJson(res, 200, {
       message: "Your seat has been released.",
       ...(await portalPayload(sql, participant, rules)),
+    });
+  }
+
+  // -- Correct my own details ------------------------------------------------
+  // Only the fields that do not identify the participant. Email, mobile and
+  // year of birth are deliberately not here: email and mobile change needs a
+  // one-time code, and year of birth changes which studies a person qualifies for.
+  if (req.method === "POST" && pathname === "/api/me/details") {
+    const body = await readJson(req);
+    const participant = await authenticate(sql, body);
+    if (!participant) return sendJson(res, 401, { error: "Your session has expired. Please sign in again." });
+    if (participant.status === "withdrawn") {
+      return sendJson(res, 409, { error: "Your record is withdrawn, so it cannot be changed here. Write to the lab if you want to rejoin." });
+    }
+
+    const name = String(body.name || "").trim();
+    if (name.length < 2) {
+      return sendJson(res, 400, { error: "Please enter your full name." });
+    }
+
+    // Accepts the old values ("Woman", "Man") as well as the new ones, so
+    // records registered before the change can still be saved.
+    const allowedGenders = ["", "Female", "Male", "Woman", "Man", "Non-binary", "Other"];
+    const gender = String(body.gender || "").trim();
+    if (!allowedGenders.includes(gender)) {
+      return sendJson(res, 400, { error: "Please choose one of the gender options." });
+    }
+
+    await store.updateParticipantDetails(sql, participant.id, {
+      name,
+      gender,
+      isStudent:   body.isStudent !== false,
+      institution: String(body.institution || "").trim(),
+      department:  String(body.department  || "").trim(),
+      programme:   String(body.programme   || "").trim(),
+    });
+    await store.logActivity(sql, "participant_details_changed", participant.code);
+
+    const updated = await store.getParticipant(sql, participant.id);
+    return sendJson(res, 200, {
+      message: "Your details have been updated.",
+      ...(await portalPayload(sql, updated, rules)),
     });
   }
 

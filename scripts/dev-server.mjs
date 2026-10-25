@@ -39,8 +39,8 @@ const server = createServer(async (req, res) => {
   }
 
   // cleanUrls: /admin serves admin.html, as it does on Vercel.
-  let path = normalize(url.pathname).replace(/^(\.\.[/\\])+/, "");
-  if (path === "/") path = "/index.html";
+  let path = url.pathname === "/" ? "/index.html" : url.pathname;
+  path = normalize(path).replace(/^(\.\.[/\\])+/, "");
   let file = join(publicDir, path);
   if (!extname(file)) {
     try {

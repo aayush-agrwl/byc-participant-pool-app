@@ -75,13 +75,14 @@ small { font-size: .85rem; }
   display: block;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--ink);
+    color: #184878;
   letter-spacing: -.01em;
 }
 .wordmark .org {
   display: block;
   font-size: .74rem;
-  color: var(--meta);
+  font-weight: 700;
+  color: #6b7a8c;
   text-transform: uppercase;
   letter-spacing: .09em;
 }

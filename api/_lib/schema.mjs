@@ -127,4 +127,28 @@ export const statements = [
      detail      TEXT         NOT NULL DEFAULT '',
      created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
    )`,
+     // -- One-time sign-in codes -----------------------------------------------
+  // Only a hash of each code is stored. A code is single use, expires, and is
+  // locked after too many wrong attempts.
+  `CREATE TABLE IF NOT EXISTS login_codes (
+     id          SERIAL       PRIMARY KEY,
+     email       TEXT         NOT NULL,
+     code_hash   TEXT         NOT NULL,
+     attempts    INTEGER      NOT NULL DEFAULT 0,
+     expires_at  TIMESTAMPTZ  NOT NULL,
+     used_at     TIMESTAMPTZ,
+     created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+   )`,
+  `CREATE INDEX IF NOT EXISTS login_codes_email_idx ON login_codes (LOWER(email), created_at)`,
+  // -- Pretest questions and results ----------------------------------------
+  // The questions live on the study. Only pass or fail is kept per attempt,
+  // never the answers the participant gave.
+  `ALTER TABLE studies ADD COLUMN IF NOT EXISTS pretest TEXT NOT NULL DEFAULT '[]'`,
+  `CREATE TABLE IF NOT EXISTS pretest_responses (
+     id              SERIAL       PRIMARY KEY,
+     participant_id  INTEGER      NOT NULL REFERENCES participants(id) ON DELETE CASCADE,
+     study_id        INTEGER      NOT NULL REFERENCES studies(id) ON DELETE CASCADE,
+     passed          BOOLEAN      NOT NULL,
+     created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+   )`,
 ];
