@@ -200,6 +200,7 @@ async function loadStudies() {
                 <td>
                   <div class="button-row">
                     <button class="button small secondary" data-roster="${s.id}">Roster</button>
+                     <button class="button small secondary" data-session-seats="${s.id}" data-current="${s.capacity}">Seats</button>
                     <button class="button small secondary" data-session-status="${s.id}" data-next="${s.status === "open" ? "cancelled" : "open"}">
                       ${s.status === "open" ? "Cancel" : "Reopen"}
                     </button>
@@ -235,6 +236,8 @@ function bindStudyButtons() {
   $$("[data-delete-session]").forEach((b) => b.addEventListener("click", () => deleteSession(Number(b.dataset.deleteSession))));
   $$("[data-session-status]").forEach((b) => b.addEventListener("click", () =>
     setSessionStatus(Number(b.dataset.sessionStatus), b.dataset.next)));
+    $$("[data-session-seats]").forEach((b) => b.addEventListener("click", () =>
+    setSessionSeats(Number(b.dataset.sessionSeats), Number(b.dataset.current))));
   $$("form.add-session").forEach((form) => form.addEventListener("submit", addSession));
   bindRosterButtons();
 }
@@ -336,6 +339,23 @@ async function setSessionStatus(id, status) {
     "Cancel this session? Anybody already booked keeps their seat in the record, so contact them yourself and either rebook or release them.")) return;
   try {
     flash("info", text((await api(`/api/admin/sessions/${id}`, { method: "PATCH", body: { status } })).message));
+    await loadStudies();
+  } catch (error) {
+    flash("error", text(error.message));
+  }
+}
+async function setSessionSeats(id, current) {
+  const entered = window.prompt(
+    "How many seats does this day have? This is the room capacity. The over-booking buffer is added automatically.",
+    String(current));
+  if (entered === null) return;
+  const capacity = Number(entered);
+  if (!Number.isInteger(capacity) || capacity < 1 || capacity > 500) {
+    flash("error", "Please enter a whole number of seats between 1 and 500.");
+    return;
+  }
+  try {
+    flash("info", text((await api(`/api/admin/sessions/${id}/capacity`, { method: "POST", body: { capacity } })).message));
     await loadStudies();
   } catch (error) {
     flash("error", text(error.message));

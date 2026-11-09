@@ -224,6 +224,23 @@ export async function handleAdmin(req, res, pathname, sql) {
     return sendJson(res, 200, { message: "Study deleted." });
   }
 
+    // -- Change the seats on one day ------------------------------------------
+  // The number is the room capacity. The over-booking buffer is added by the
+  // rules automatically, so the lab never works it out by hand. Lowering the
+  // number never removes anybody already booked: the day simply closes to
+  // new bookings.
+  if (req.method === "POST" && /^\/api\/admin\/sessions\/\d+\/capacity$/.test(pathname)) {
+    const id = idFrom(pathname, 4);
+    const body = await readJson(req);
+    const capacity = Number(body.capacity);
+    if (!Number.isInteger(capacity) || capacity < 1 || capacity > 500) {
+      return sendJson(res, 400, { error: "Please enter a number of seats between 1 and 500." });
+    }
+    const updated = await store.updateSessionCapacity(sql, id, capacity);
+    if (!updated) return sendJson(res, 404, { error: "That day could not be found." });
+    await store.logActivity(sql, "session_capacity", `session ${id} set to ${capacity} seats`);
+    return sendJson(res, 200, { message: `Seats for this day are now ${capacity}.`, capacity: updated.capacity });
+  }
   // -- Sessions --------------------------------------------------------------
   if (req.method === "POST" && pathname === "/api/admin/sessions") {
     const body = await readJson(req);

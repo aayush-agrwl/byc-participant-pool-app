@@ -621,3 +621,9 @@ export async function recordPretest(sql, participantId, studyId, passed) {
   await sql`INSERT INTO pretest_responses (participant_id, study_id, passed)
             VALUES (${participantId}, ${studyId}, ${passed})`;
 }
+export async function updateSessionCapacity(sql, id, capacity) {
+  const rows = await sql`UPDATE sessions SET capacity = ${capacity}
+                         WHERE id = ${id}
+                         RETURNING id, starts_at, capacity`;
+  return rows[0] || null;
+}
